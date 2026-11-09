@@ -91,7 +91,16 @@ pub fn is_smoke_test(state: State<'_, SmokeState>) -> bool {
 }
 
 #[tauri::command]
-pub fn report_smoke_result(app: AppHandle, passed: bool, details: String) {
+pub fn report_smoke_result(
+    app: AppHandle,
+    state: State<'_, SmokeState>,
+    passed: bool,
+    details: String,
+) -> Result<(), &'static str> {
+    if !state.enabled {
+        return Err("smoke test mode is not enabled");
+    }
+
     let clipboard_ok = app
         .clipboard()
         .read_text()
@@ -107,4 +116,5 @@ pub fn report_smoke_result(app: AppHandle, passed: bool, details: String) {
         );
         app.exit(1);
     }
+    Ok(())
 }

@@ -7,6 +7,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   rust-checks:
     name: Rust Core Tests & Lints
@@ -41,7 +44,7 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Install Tauri CLI
-        run: cargo install tauri-cli --version "^2" --locked
+        run: cargo install tauri-cli --version "=2.12.4" --locked
 
       - name: Build Windows installers (NSIS + MSI) and release binary
         run: cargo tauri build

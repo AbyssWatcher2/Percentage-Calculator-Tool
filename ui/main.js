@@ -34,15 +34,46 @@ function getNumber(id) {
   return Number.isNaN(num) ? null : num;
 }
 
+function setLines(el, lines) {
+  if (!el) return;
+  el.replaceChildren();
+  lines.forEach((line, idx) => {
+    if (idx > 0) el.appendChild(document.createElement("br"));
+    el.appendChild(document.createTextNode(line));
+  });
+}
+
+function setFormulaError(el, formula, errorNote) {
+  if (!el) return;
+  const errSpan = document.createElement("span");
+  errSpan.className = "error-text";
+  errSpan.textContent = errorNote;
+  el.replaceChildren(document.createTextNode(`${formula} `), errSpan);
+}
+
 function setResult(resultId, content, isError = false) {
   const el = document.getElementById(resultId);
   if (!el) return;
 
+  const prefix = document.createElement("span");
+  prefix.className = "result-prefix";
+  prefix.textContent = "=";
+
   if (isError) {
-    el.innerHTML = `<span class="result-prefix">=</span><span class="error-text">${content}</span>`;
-  } else {
-    el.innerHTML = `<span class="result-prefix">=</span>${content}`;
+    const errSpan = document.createElement("span");
+    errSpan.className = "error-text";
+    errSpan.textContent = content;
+    el.replaceChildren(prefix, errSpan);
+    return;
   }
+
+  const parts = String(content).split("<br>");
+  const nodes = [prefix];
+  parts.forEach((part, idx) => {
+    if (idx > 0) nodes.push(document.createElement("br"));
+    nodes.push(document.createTextNode(part));
+  });
+  el.replaceChildren(...nodes);
 }
 
 function showCopyFeedback(button) {
@@ -89,8 +120,8 @@ async function updateChangeLive() {
   const resultSpan = document.getElementById("changeLiveResult");
 
   if (orig === null || newVal === null) {
-    formulaDiv.innerHTML = "((new − original) / original) × 100";
-    resultSpan.innerHTML = "→ —";
+    formulaDiv.textContent = "((new − original) / original) × 100";
+    resultSpan.textContent = "→ —";
     setResult("changeResult", "—");
     return;
   }
@@ -102,15 +133,18 @@ async function updateChangeLive() {
   if (ticket !== seq.change) return;
 
   if (result.ok === "false") {
-    formulaDiv.innerHTML =
-      '((new − original) / original) × 100 <span class="error-text">(original cannot be zero)</span>';
-    resultSpan.innerHTML = "→ invalid";
+    setFormulaError(
+      formulaDiv,
+      "((new − original) / original) × 100",
+      "(original cannot be zero)"
+    );
+    resultSpan.textContent = "→ invalid";
     setResult("changeResult", result.error, true);
     return;
   }
 
-  formulaDiv.innerHTML = `((${newVal} − ${orig}) / ${orig}) × 100`;
-  resultSpan.innerHTML = `→ ${result.liveResult}`;
+  formulaDiv.textContent = `((${newVal} − ${orig}) / ${orig}) × 100`;
+  resultSpan.textContent = `→ ${result.liveResult}`;
   setResult("changeResult", result.label);
 }
 
@@ -122,8 +156,8 @@ async function updatePercentLive() {
   const resultSpan = document.getElementById("percentLiveResult");
 
   if (x === null || y === null) {
-    formulaDiv.innerHTML = "(X / Y) × 100";
-    resultSpan.innerHTML = "→ —";
+    formulaDiv.textContent = "(X / Y) × 100";
+    resultSpan.textContent = "→ —";
     setResult("percentResult", "—");
     return;
   }
@@ -132,15 +166,14 @@ async function updatePercentLive() {
   if (ticket !== seq.percent) return;
 
   if (result.ok === "false") {
-    formulaDiv.innerHTML =
-      '(X / Y) × 100 <span class="error-text">(Y cannot be zero)</span>';
-    resultSpan.innerHTML = "→ invalid";
+    setFormulaError(formulaDiv, "(X / Y) × 100", "(Y cannot be zero)");
+    resultSpan.textContent = "→ invalid";
     setResult("percentResult", result.error, true);
     return;
   }
 
-  formulaDiv.innerHTML = `(${x} / ${y}) × 100`;
-  resultSpan.innerHTML = `→ ${result.label}`;
+  formulaDiv.textContent = `(${x} / ${y}) × 100`;
+  resultSpan.textContent = `→ ${result.label}`;
   setResult("percentResult", result.label);
 }
 
@@ -152,8 +185,8 @@ async function updateWhatLive() {
   const resultSpan = document.getElementById("whatLiveResult");
 
   if (x === null || y === null) {
-    formulaDiv.innerHTML = "(X / 100) × Y";
-    resultSpan.innerHTML = "→ —";
+    formulaDiv.textContent = "(X / 100) × Y";
+    resultSpan.textContent = "→ —";
     setResult("whatResult", "—");
     return;
   }
@@ -161,8 +194,8 @@ async function updateWhatLive() {
   const result = await invoke("calc_portion", { percent: x, number: y });
   if (ticket !== seq.what) return;
 
-  formulaDiv.innerHTML = `(${x} / 100) × ${y}`;
-  resultSpan.innerHTML = `→ ${result.label}`;
+  formulaDiv.textContent = `(${x} / 100) × ${y}`;
+  resultSpan.textContent = `→ ${result.label}`;
   setResult("whatResult", result.label);
 }
 
@@ -174,9 +207,11 @@ async function updateDiscountLive() {
   const resultSpan = document.getElementById("discountLiveResult");
 
   if (price === null || disc === null) {
-    formulaDiv.innerHTML =
-      "final = price × (1 − discount/100)<br>saved = price × discount/100";
-    resultSpan.innerHTML = "→ —";
+    setLines(formulaDiv, [
+      "final = price × (1 − discount/100)",
+      "saved = price × discount/100"
+    ]);
+    resultSpan.textContent = "→ —";
     setResult("discountResult", "—");
     return;
   }
@@ -187,8 +222,11 @@ async function updateDiscountLive() {
   });
   if (ticket !== seq.discount) return;
 
-  formulaDiv.innerHTML = `final = ${price} × (1 − ${disc}/100) = ${result.finalText}<br>saved = ${price} × ${disc}/100 = ${result.savedText}`;
-  resultSpan.innerHTML = `→ final: ${result.finalText} | saved: ${result.savedText}`;
+  setLines(formulaDiv, [
+    `final = ${price} × (1 − ${disc}/100) = ${result.finalText}`,
+    `saved = ${price} × ${disc}/100 = ${result.savedText}`
+  ]);
+  resultSpan.textContent = `→ final: ${result.finalText} | saved: ${result.savedText}`;
   setResult("discountResult", result.label);
 }
 
@@ -200,8 +238,8 @@ async function updateBaseLive() {
   const resultSpan = document.getElementById("baseLiveResult");
 
   if (x === null || y === null) {
-    formulaDiv.innerHTML = "X / (Y / 100)";
-    resultSpan.innerHTML = "→ —";
+    formulaDiv.textContent = "X / (Y / 100)";
+    resultSpan.textContent = "→ —";
     setResult("baseResult", "—");
     return;
   }
@@ -210,15 +248,14 @@ async function updateBaseLive() {
   if (ticket !== seq.base) return;
 
   if (result.ok === "false") {
-    formulaDiv.innerHTML =
-      'X / (Y / 100) <span class="error-text">(Y cannot be zero)</span>';
-    resultSpan.innerHTML = "→ invalid";
+    setFormulaError(formulaDiv, "X / (Y / 100)", "(Y cannot be zero)");
+    resultSpan.textContent = "→ invalid";
     setResult("baseResult", result.error, true);
     return;
   }
 
-  formulaDiv.innerHTML = `${x} / (${y} / 100)`;
-  resultSpan.innerHTML = `→ ${result.label}`;
+  formulaDiv.textContent = `${x} / (${y} / 100)`;
+  resultSpan.textContent = `→ ${result.label}`;
   setResult("baseResult", result.label);
 }
 
