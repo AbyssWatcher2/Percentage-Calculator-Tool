@@ -31,6 +31,8 @@ jobs:
     name: Windows Build, Smoke Test & Bundles
     needs: rust-checks
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -68,3 +70,17 @@ jobs:
           name: Percentage-Calculator-Tool-Windows-v2.0.0
           path: dist/**
           if-no-files-found: error
+
+      - name: Publish GitHub Release on version tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          gh release create $tag `
+            (Get-Item "dist/Installer/*setup*.exe").FullName `
+            (Get-Item "dist/Installer/*.msi").FullName `
+            (Get-Item "dist/Portable/*.exe").FullName `
+            --title "Percentage Calculator Tool Desktop $tag (Tauri v2 + Rust)" `
+            --notes-file .github/release-notes-v2.0.0.md
