@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>percent • terminal utility</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./main.js"></script>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-row">
+      <div>
+        <h1>Percentage Calculator Tool</h1>
+        <p>offline · local · clean</p>
+      </div>
+      <div class="header-actions">
+        <button class="utility-btn" id="clearAllBtn">clear all</button>
+        <button class="utility-btn" id="aboutBtn">about</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-section">
+    <div class="calc-grid">
+      <div class="left-panel">
+        <div class="section-title">Percentage Change</div>
+        <div class="section-subtitle">Shows how much a value increased or decreased relative to the original.</div>
+
+        <div class="input-row">
+          <label for="changeOrig">Original value</label>
+          <input type="number" id="changeOrig" placeholder="e.g., 150" step="any">
+        </div>
+        <div class="input-row">
+          <label for="changeNew">New value</label>
+          <input type="number" id="changeNew" placeholder="e.g., 180" step="any">
+        </div>
+
+        <div class="button-group">
+          <button class="calc-btn" id="calcChangeBtn">calculate</button>
+          <button class="reset-btn" id="resetChangeBtn">clear</button>
+          <button class="copy-btn" id="copyChangeBtn">copy</button>
+        </div>
+
+        <div class="result" id="changeResult">—</div>
+      </div>
+
+      <div class="right-panel">
+        <div class="formula-title">live formula</div>
+        <div class="live-formula" id="changeLiveFormula">((new − original) / original) × 100</div>
+        <div class="live-result" id="changeLiveResult">→ —</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-section">
+    <div class="calc-grid">
+      <div class="left-panel">
+        <div class="section-title">Percentage of Total</div>
+        <div class="section-subtitle">Finds what percentage one number is of another.</div>
+
+        <div class="input-row">
+          <label for="isWhatX">X (part)</label>
+          <input type="number" id="isWhatX" placeholder="e.g., 50" step="any">
+        </div>
+        <div class="input-row">
+          <label for="isWhatY">Y (total)</label>
+          <input type="number" id="isWhatY" placeholder="e.g., 200" step="any">
+        </div>
+
+        <div class="button-group">
+          <button class="calc-btn" id="calcPercentBtn">calculate</button>
+          <button class="reset-btn" id="resetPercentBtn">clear</button>
+          <button class="copy-btn" id="copyPercentBtn">copy</button>
+        </div>
+
+        <div class="result" id="percentResult">—</div>
+      </div>
+
+      <div class="right-panel">
+        <div class="formula-title">live formula</div>
+        <div class="live-formula" id="percentLiveFormula">(X / Y) × 100</div>
+        <div class="live-result" id="percentLiveResult">→ —</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-section">
+    <div class="calc-grid">
+      <div class="left-panel">
+        <div class="section-title">Calculate Percentage</div>
+        <div class="section-subtitle">Calculates a percentage portion of a number.</div>
+
+        <div class="input-row">
+          <label for="whatX">X (percent)</label>
+          <input type="number" id="whatX" placeholder="e.g., 20" step="any">
+        </div>
+        <div class="input-row">
+          <label for="whatY">Y (number)</label>
+          <input type="number" id="whatY" placeholder="e.g., 500" step="any">
+        </div>
+
+        <div class="button-group">
+          <button class="calc-btn" id="calcWhatBtn">calculate</button>
+          <button class="reset-btn" id="resetWhatBtn">clear</button>
+          <button class="copy-btn" id="copyWhatBtn">copy</button>
+        </div>
+
+        <div class="result" id="whatResult">—</div>
+      </div>
+
+      <div class="right-panel">
+        <div class="formula-title">live formula</div>
+        <div class="live-formula" id="whatLiveFormula">(X / 100) × Y</div>
+        <div class="live-result" id="whatLiveResult">→ —</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-section">
+    <div class="calc-grid">
+      <div class="left-panel">
+        <div class="section-title">Discount</div>
+        <div class="section-subtitle">Calculates final price and savings after a percentage discount.</div>
+
+        <div class="input-row">
+          <label for="discountPrice">Original price</label>
+          <input type="number" id="discountPrice" placeholder="e.g., 79.99" step="any">
+        </div>
+        <div class="input-row">
+          <label for="discountPercent">Discount (%)</label>
+          <input type="number" id="discountPercent" placeholder="e.g., 20" step="any">
+        </div>
+
+        <div class="button-group">
+          <button class="calc-btn" id="calcDiscountBtn">calculate</button>
+          <button class="reset-btn" id="resetDiscountBtn">clear</button>
+          <button class="copy-btn" id="copyDiscountBtn">copy</button>
+        </div>
+
+        <div class="result" id="discountResult">—</div>
+      </div>
+
+      <div class="right-panel">
+        <div class="formula-title">live formula</div>
+        <div class="live-formula" id="discountLiveFormula">final = price × (1 − discount/100)<br>saved = price × discount/100</div>
+        <div class="live-result" id="discountLiveResult">→ —</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-section">
+    <div class="calc-grid">
+      <div class="left-panel">
+        <div class="section-title">Find Original Value</div>
+        <div class="section-subtitle">Finds the full number when you know a value and its percentage.</div>
+
+        <div class="input-row">
+          <label for="baseX">X (value)</label>
+          <input type="number" id="baseX" placeholder="e.g., 50" step="any">
+        </div>
+        <div class="input-row">
+          <label for="baseY">Y (percent)</label>
+          <input type="number" id="baseY" placeholder="e.g., 25" step="any">
+        </div>
+
+        <div class="button-group">
+          <button class="calc-btn" id="calcBaseBtn">calculate</button>
+          <button class="reset-btn" id="resetBaseBtn">clear</button>
+          <button class="copy-btn" id="copyBaseBtn">copy</button>
+        </div>
+
+        <div class="result" id="baseResult">—</div>
+      </div>
+
+      <div class="right-panel">
+        <div class="formula-title">live formula</div>
+        <div class="live-formula" id="baseLiveFormula">X / (Y / 100)</div>
+        <div class="live-result" id="baseLiveResult">→ —</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Directed by a Human, made by DeepSeek & ChatGPT · 2026 · <span id="appVersion">Desktop v2.0.0</span></footer>
+</div>
+</body>
+</html>

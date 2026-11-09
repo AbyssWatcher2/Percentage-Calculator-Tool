@@ -1,0 +1,6 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/percent-core",
+    "src-tauri",
+]

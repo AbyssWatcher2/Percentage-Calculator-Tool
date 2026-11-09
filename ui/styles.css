@@ -1,0 +1,258 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #0E0F12;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+  line-height: 1.5;
+  color: #e2e4e8;
+  padding: 2rem 1rem;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #2a2d35;
+  padding-bottom: 1rem;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.header h1 {
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #E9A715;
+}
+
+.header p {
+  font-size: 0.8rem;
+  color: #8f9aaf;
+  margin-top: 0.3rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.calc-section {
+  background: #161822;
+  margin-bottom: 1.8rem;
+  padding: 1.2rem 1.5rem;
+  border-left: 2px solid #E9A715;
+  transition: border-left-color 0.12s ease, background 0.12s ease;
+}
+
+.calc-section:hover {
+  border-left-color: #94C59A;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.8rem;
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: #E9A715;
+  margin-bottom: 0.45rem;
+  border-left: 2px solid #E9A715;
+  padding-left: 0.7rem;
+}
+
+.section-subtitle {
+  font-size: 0.72rem;
+  color: #8f9aaf;
+  margin-bottom: 1rem;
+  padding-left: 0.85rem;
+}
+
+.input-row {
+  margin-bottom: 1rem;
+}
+
+.input-row label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #a3adc2;
+  margin-bottom: 0.25rem;
+  letter-spacing: 0;
+}
+
+.input-row input {
+  width: 100%;
+  background: #0E0F12;
+  border: 1px solid #2d313c;
+  border-radius: 0;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.85rem;
+  font-family: 'SF Mono', monospace;
+  color: #eef2ff;
+  outline: none;
+  transition: border-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+.input-row input:focus {
+  border-color: #94C59A;
+  box-shadow: 0 0 0 1px #94C59A;
+}
+
+.input-row input::placeholder {
+  color: #454c5e;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.5rem 0 1rem 0;
+  flex-wrap: wrap;
+}
+
+.calc-btn {
+  background: #E9A715;
+  border: none;
+  color: #0E0F12;
+  font-family: 'SF Mono', monospace;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  width: auto;
+  letter-spacing: 0;
+  transition: opacity 0.1s ease;
+}
+
+.calc-btn:hover {
+  opacity: 0.9;
+}
+
+.reset-btn,
+.copy-btn,
+.utility-btn {
+  background: transparent;
+  border: 1px solid #3a3f4c;
+  color: #cbd5e6;
+  font-family: 'SF Mono', monospace;
+  font-size: 0.7rem;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.1s ease, color 0.1s ease;
+}
+
+.reset-btn:hover,
+.copy-btn:hover,
+.utility-btn:hover {
+  border-color: #E9A715;
+  color: #E9A715;
+}
+
+.copy-btn.copied {
+  border-color: #94C59A;
+  color: #94C59A;
+}
+
+.result {
+  background: #0E0F12;
+  border-left: 2px solid #E9A715;
+  padding: 0.7rem 1rem;
+  font-size: 1.08rem;
+  font-family: monospace;
+  margin-top: 0.2rem;
+  word-break: break-word;
+  color: #eef2ff;
+}
+
+.result-prefix {
+  color: #E9A715;
+  margin-right: 0.45rem;
+}
+
+.error-text {
+  color: #E9A715;
+}
+
+.right-panel {
+  background: #0E0F12;
+  padding: 1rem;
+  border: 1px solid #2a2d35;
+  font-size: 0.8rem;
+}
+
+.formula-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #94C59A;
+  letter-spacing: 0;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid #2a2d35;
+  display: inline-block;
+  padding-bottom: 0.2rem;
+}
+
+.live-formula {
+  font-family: monospace;
+  line-height: 1.7;
+  color: #cbd5e6;
+}
+
+.live-result {
+  margin-top: 1rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid #2a2d35;
+  color: #E9A715;
+  font-weight: 500;
+}
+
+footer {
+  margin-top: 2rem;
+  font-size: 0.7rem;
+  color: #5d6a83;
+  text-align: center;
+  border-top: 1px solid #2a2d35;
+  padding-top: 1rem;
+}
+
+@media (max-width: 760px) {
+  .header-row {
+    flex-direction: column;
+  }
+
+  .header-actions {
+    justify-content: flex-start;
+  }
+
+  .calc-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .calc-section {
+    padding: 1rem;
+  }
+}
