@@ -330,3 +330,39 @@ It is the combination of:
 - readable history
 
 That makes the project easier to return to later.
+
+---
+
+## Session: November 9th, 2026 - Full Rebuild on Tauri v2 and Rust (Desktop v2.0.0)
+
+---
+
+### Goal
+
+Rebuild the desktop application from Electron (v1.1.0) to **Tauri v2 + Rust (v2.0.0)** with:
+
+- all percentage math moved into Rust
+- the existing HTML/CSS interface preserved unchanged
+- work isolated on a `tauri-rebuild` branch and delivered via pull request
+- Windows installer and portable outputs built and smoke-tested automatically
+
+---
+
+### Risk-First Preparation (Phase 0)
+
+Before changing any application code:
+
+1. **Rollback tag:** tagged the working Electron commit as `v1.1.0-electron` and pushed it to `origin`.
+2. **Golden math fixtures:** ran the original v1.1 `src/calculations.js` in Node across **10,661** deterministic edge-case and random inputs (`crates/percent-core/tests/fixtures/golden.json`) so the Rust port could be proven byte-for-byte identical.
+3. **Headless Linux Tauri toolchain:** unpacked the Debian 12 `webkit2gtk-4.1` development stack into user space so the full Tauri binary and `--smoke-test` could be compiled and executed locally under Xvfb before pushing to Windows CI.
+
+---
+
+### What Was Built
+
+1. **`crates/percent-core`** — pure Rust crate implementing `format_decimal`, `calculate_percentage_change`, `calculate_percentage_of_total`, `calculate_percentage_portion`, `calculate_discount`, and `calculate_original_value`. Includes `js_round` and `js_to_fixed_2` helpers so tie-breaking matches JavaScript's `Math.round` and `Number.prototype.toFixed(2)` across all 10,661 golden cases.
+2. **`src-tauri`** — Tauri v2 shell configuring the 1120×860 window (`#0E0F12`), strict CSP, least-privilege capabilities, clipboard and dialog plugins, typed calculation/app-info/About commands, and `--smoke-test` mode with a 20-second watchdog.
+3. **`ui/`** — the existing `index.html` and `styles.css` (with `.error-text` replacing inline styles for strict CSP compliance) paired with `main.js`, which invokes the Rust commands and uses per-section sequence counters to discard stale async replies.
+4. **`.github/workflows/build.yml`** — GitHub Actions pipeline running `cargo fmt --check`, `cargo clippy`, `cargo test -p percent-core`, `cargo tauri build` on `windows-latest`, the live `percentage-calculator-tool.exe --smoke-test`, and uploading the NSIS installer, MSI installer, and standalone portable `.exe`.
+5. **Cleanup** — removed the legacy `electron/`, `src/`, `tests/`, `scripts/`, `package.json`, and `package-lock.json` files once the Tauri build and smoke test passed.
+

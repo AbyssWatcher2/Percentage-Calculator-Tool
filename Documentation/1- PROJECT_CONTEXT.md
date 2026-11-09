@@ -28,38 +28,36 @@ This is a personal utility tool, not a large commercial application.
 The app is a transparent desktop wrapper around a focused calculator workflow:
 
 ```text
-User Input
--> Live Calculator Logic
--> Formula Preview
--> Result Display
--> Optional Copy
+User Input (HTML/JS)
+-> Tauri Command IPC
+-> Pure Rust Calculation Engine (percent-core)
+-> Live Formula & Result Display
+-> Optional Copy to System Clipboard
 ```
 
-The important design decision was to avoid overbuilding.
+The important design decision was to avoid overbuilding on the UI side while making the desktop runtime and calculation engine as lean and reliable as possible.
 
-Electron is used only to provide a desktop shell, app identity, packaging, and safe access to desktop features such as the clipboard and About dialog.
+In **v1.0–v1.1** the desktop shell used Electron. In **v2.0.0** the app was rebuilt on **Tauri v2 and Rust**: the UI stayed plain HTML/CSS/JS, the math moved into a pure Rust crate (`percent-core`), and the bundled Chromium/Node runtime was replaced by the system webview and a compiled Rust binary.
 
 ---
 
 ## Final Scope Definition
 
-### Included in the Current Version
+### Included in the Current Version (v2.0.0)
 
-- Electron desktop app
+- Tauri v2 + Rust desktop app
 - Windows native title bar
-- offline local renderer
-- five percentage calculators
+- offline local webview UI (`ui/`)
+- five percentage calculators implemented in Rust (`crates/percent-core`)
 - live formula previews
-- copy-to-clipboard buttons
-- copy feedback
+- copy-to-clipboard buttons with visible feedback
 - Clear All button
-- About dialog
-- tested calculation helpers
-- Electron smoke test
-- Windows installer build
-- Windows portable build
-- clean final-output folder
-- local Git repository with documentation-style commits
+- native About dialog
+- Rust unit tests + 10,661-case golden parity suite against v1.1 JS math
+- real-window Tauri smoke test (`--smoke-test`)
+- Windows NSIS and MSI installer builds
+- Windows standalone portable executable
+- GitHub Actions CI workflow for automated Windows builds and tests
 - project documentation modeled after the AI Ambassadors documentation structure
 
 ---
@@ -89,12 +87,12 @@ The project intentionally does not include:
 - database storage
 - network calls
 - auto-updater
-- code signing
+- paid code signing
 - custom Discord-style title bar
 - complex theming system
 - React or another frontend framework
 - mobile builds
-- macOS or Linux packaging
+- macOS or Linux release installers (the codebase is portable, but release packaging targets Windows)
 
 These exclusions keep the app small, understandable, and aligned with its original utility purpose.
 
@@ -120,42 +118,22 @@ The tool is small, but the documentation is intentionally serious because future
 
 The project is considered successful if:
 
-- the calculator works locally as an Electron app
-- all five calculator sections preserve the original behavior
+- the calculator works locally as a Tauri v2 desktop app
+- all five calculator sections preserve the original v1.1 behavior byte-for-byte
 - copy feedback and Clear All work reliably
-- the app exposes safe desktop APIs through preload
-- the Windows installer and portable builds are generated
-- the final-output folder is easy to understand
+- the app exposes narrow, least-privilege Tauri commands and capabilities
+- the Windows installer and portable builds are generated automatically in CI
 - the documentation explains the project context and architecture clearly
-- the local Git history tells a readable project story
-- the repository is ready to connect to a private GitHub remote
+- the Git history tells a readable project story
 
 ---
 
 ## Current Final State
 
-At the v1.1.0 stage, the project is:
+At the **v2.0.0** stage, the project is:
 
-- implemented as a structured Electron app
-- tested with unit tests and a desktop smoke test
-- packaged for Windows as installer and portable builds
+- implemented as a Cargo workspace (`percent-core` + `src-tauri`) with a static `ui/` frontend
+- tested with Rust unit tests, 10,661 golden parity cases, and a live desktop smoke test
+- packaged for Windows as NSIS, MSI, and portable builds via GitHub Actions
 - documented in a numbered `Documentation` folder
-- initialized as a local Git repository
-- prepared for private GitHub publishing once a remote is available
-
----
-
-## Why This Project Matters
-
-Technically, this is a small calculator.
-
-But the project matters because it demonstrates a complete workflow:
-
-- start from a useful single-file HTML tool
-- convert it into a real desktop app
-- preserve the original behavior
-- add careful polish without bloating the product
-- document the architecture and decisions
-- prepare the project for version control and future sharing
-
-The result is both a working tool and a record of how it was built.
+- preserved with the `v1.1.0-electron` tag pointing at the final Electron version
