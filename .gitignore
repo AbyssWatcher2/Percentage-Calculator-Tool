@@ -1,7 +1,12 @@
-# Dependencies
-node_modules/
+# Rust / Cargo build output
+target/
+**/target/
 
-# Electron Builder output
+# Tauri generated schemas
+src-tauri/gen/
+
+# Legacy Node / Electron artifacts (kept ignored in case old branches are checked out)
+node_modules/
 dist/
 release/
 out/

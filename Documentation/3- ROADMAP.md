@@ -1,6 +1,6 @@
 # Roadmap
 
-This roadmap reflects both the current completed work and the likely future direction of the Percentage Calculator Tool Desktop project.
+This roadmap reflects both the completed phases and the future direction of the Percentage Calculator Tool Desktop project.
 
 It should be read as a project memory document, not only a task list.
 
@@ -9,161 +9,69 @@ It should be read as a project memory document, not only a task list.
 ## Phase 1 - Original HTML Utility
 **Status: Completed**
 
-### Goals
-
-- build a small local percentage calculator
-- keep it offline
-- keep it single-file
-- use a terminal-inspired UI
-- support fast practical calculations
-
-### What was completed
-
-- original single-file HTML app was created
-- five calculator types were implemented
-- live formula display was included
-- copy buttons were added
-- documentation existed in the original finished-project folder
-
-### Outcome
-
-This phase produced the useful calculator that became the source for the desktop app.
+- built a small offline single-file HTML percentage calculator with five calculation sections, live formula display, and copy buttons (`reference/Percentage Calculator Tool v1.1.html`).
 
 ---
 
 ## Phase 2 - Electron Desktop Conversion
 **Status: Completed**
 
-### Goals
-
-- turn the finished HTML tool into a desktop application
-- preserve the original UI and behavior
-- create a real Windows app identity
-- support installer and portable builds
-
-### What was completed
-
-- Electron project was created
-- original HTML was split into structured files
-- main process and preload bridge were added
-- app icon assets were generated
-- Electron Builder packaging was configured
-- installer and portable builds were produced
-
-### Outcome
-
-The project moved from a browser-opened HTML file into a working Windows desktop app.
+- split the single-file tool into a structured Electron desktop app with a preload bridge, icon assets, and Electron Builder NSIS + portable Windows builds.
 
 ---
 
 ## Phase 3 - Testing and Build Verification
 **Status: Completed**
 
-### Goals
-
-- protect the calculator formulas
-- verify the real Electron app launches correctly
-- make packaging safer to repeat
-
-### What was completed
-
-- calculation helpers were separated from the renderer
-- Vitest unit tests were added
-- Electron smoke test was added
-- build script was connected to tests
-- portable and installer outputs were verified
-
-### Outcome
-
-The app became safer to change because core behavior is now checked automatically.
+- separated calculation helpers, added Vitest unit tests, and created a real-window Electron smoke test.
 
 ---
 
 ## Phase 4 - Clean Final Output Folder
 **Status: Completed**
 
-### Goals
-
-- reduce confusion around generated files
-- separate user-facing deliverables from source code
-- make the installer and portable version easy to find
-
-### What was completed
-
-- final-output folder was created outside the source project
-- installer and portable builds were copied into clear subfolders
-- a "START HERE" explanation file was added
-
-### Outcome
-
-The final app files became easier to understand and share.
+- separated user-facing Installer and Portable deliverables from intermediate build files.
 
 ---
 
 ## Phase 5 - Desktop v1.1 Polish
 **Status: Completed**
 
-### Goals
-
-- improve the app without making it larger than it needs to be
-- add small desktop-app touches
-- make user interactions more reassuring
-
-### What was completed
-
-- copy feedback was added
-- Clear All button was added
-- About dialog was added
-- app version was shown in the footer
-- preload app-info and About APIs were added
-- smoke test was extended for v1.1 behavior
-- useful developer comments were added
-
-### Outcome
-
-The app now feels more like a finished desktop utility while preserving its simple identity.
+- added copy feedback, Clear All, About dialog, footer version text, and expanded smoke test coverage.
 
 ---
 
-## Phase 6 - Documentation and Local Repository Foundation
+## Phase 6 - Documentation and Repository Foundation
+**Status: Completed**
+
+- wrote the numbered `Documentation/` set, initialized readable Git history, and published to GitHub (`v1.1.0` / `v1.1.0-electron`).
+
+---
+
+## Phase 7 - Tauri v2 & Rust Rebuild (v2.0.0)
 **Status: Completed**
 
 ### Goals
 
-- document the project in a style similar to AI Ambassadors GP Project #7
-- create a local Git repository
-- use readable commits as part of the project record
-- prepare for private GitHub publishing
+- replace Electron and Node with **Tauri v2 and Rust**
+- move all percentage calculations into a pure Rust crate (`percent-core`)
+- keep the terminal-inspired HTML/CSS interface and behavior 100% identical
+- guarantee zero math regressions against v1.1
+- automate Windows builds and smoke testing on GitHub Actions
 
 ### What was completed
 
-- `Documentation` folder was added
-- project context was written
-- architecture was documented
-- roadmap was reconstructed
-- session summary was written
-- root README was rewritten
-- `.gitignore` was added
-- local Git history was initialized
+- tagged the final Electron state as `v1.1.0-electron` for instant rollback
+- generated 10,661 golden test fixtures from the v1.1 JS math and verified byte-for-byte parity in `percent-core` (including JS `Math.round` and `toFixed(2)` tie-breaking rules)
+- built the `src-tauri` desktop shell with typed commands, clipboard and dialog plugins, least-privilege capabilities, and a strict CSP
+- adapted the static `ui/` frontend to call Tauri commands with per-section sequence guards
+- ported all 30+ real-window `--smoke-test` checks to Tauri and verified them locally under Xvfb and in Windows CI
+- removed the legacy Electron, Vitest, and `node_modules` toolchain
+- added `.github/workflows/build.yml` to build and test the Windows NSIS installer, MSI installer, and portable executable automatically
 
 ### Outcome
 
-The project became understandable as a complete development artifact, not just an app folder.
-
----
-
-## Current Final Project State
-
-The project is currently:
-
-- a structured Electron desktop app
-- Windows-focused
-- offline
-- tested
-- packaged
-- documented
-- committed locally with readable history
-- ready for a private GitHub remote when available
+The app keeps the exact look, feel, and results of v1.1 while shipping as a small, dependency-light Rust + Tauri v2 desktop binary.
 
 ---
 
@@ -171,12 +79,8 @@ The project is currently:
 
 Future improvements can include:
 
-- custom Discord-style title bar
+- custom title bar
 - compact mode that hides formula panels
-- better multi-size icon set
-- code signing for public sharing
-- GitHub Releases for distributing installer and portable builds
-- automated CI checks
+- paid Windows Authenticode code signing (to remove the SmartScreen "unknown publisher" prompt)
+- macOS and Linux release bundles in the GitHub Actions matrix
 - auto-update support
-
-These are intentionally future items. They are not required for the current personal utility version.

@@ -1,0 +1,70 @@
+name: Build & Verify (Tauri v2)
+
+on:
+  push:
+    branches: ["main", "tauri-rebuild"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-checks:
+    name: Rust Core Tests & Lints
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      - name: Run percent-core unit + 10k golden parity tests
+        run: cargo test -p percent-core -- --nocapture
+      - name: Clippy on percent-core
+        run: cargo clippy -p percent-core --all-targets -- -D warnings
+
+  windows-build:
+    name: Windows Build, Smoke Test & Bundles
+    needs: rust-checks
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+
+      - name: Clippy on full workspace (Windows)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "=2.12.4" --locked
+
+      - name: Build Windows installers (NSIS + MSI) and release binary
+        run: cargo tauri build
+
+      - name: Run real Tauri window smoke test
+        run: .\target\release\percentage-calculator-tool.exe --smoke-test
+
+      - name: Stage clean deliverables (Installer + Portable)
+        shell: pwsh
+        run: |
+          $ver = "2.0.0"
+          New-Item -ItemType Directory -Force -Path dist/Installer, dist/Portable | Out-Null
+          Copy-Item "target/release/bundle/nsis/*setup*.exe" "dist/Installer/"
+          Copy-Item "target/release/bundle/msi/*.msi" "dist/Installer/"
+          Copy-Item "target/release/percentage-calculator-tool.exe" "dist/Portable/Percentage Calculator Tool Portable $ver.exe"
+          Get-ChildItem -Recurse dist
+
+      - name: Upload Windows deliverables
+        uses: actions/upload-artifact@v4
+        with:
+          name: Percentage-Calculator-Tool-Windows-v2.0.0
+          path: dist/**
+          if-no-files-found: error

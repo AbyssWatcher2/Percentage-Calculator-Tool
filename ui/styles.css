@@ -193,6 +193,10 @@ body {
   margin-right: 0.45rem;
 }
 
+.error-text {
+  color: #E9A715;
+}
+
 .right-panel {
   background: #0E0F12;
   padding: 1rem;
