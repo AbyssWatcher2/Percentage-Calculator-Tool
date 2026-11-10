@@ -2,7 +2,7 @@ name: Build & Verify (Tauri v2)
 
 on:
   push:
-    branches: ["main", "tauri-rebuild"]
+    branches: ["main", "v2.1-features"]
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
@@ -57,7 +57,7 @@ jobs:
       - name: Stage clean deliverables (Installer + Portable)
         shell: pwsh
         run: |
-          $ver = "2.0.0"
+          $ver = "2.1.0"
           New-Item -ItemType Directory -Force -Path dist/Installer, dist/Portable | Out-Null
           Copy-Item "target/release/bundle/nsis/*setup*.exe" "dist/Installer/"
           Copy-Item "target/release/bundle/msi/*.msi" "dist/Installer/"
@@ -67,7 +67,7 @@ jobs:
       - name: Upload Windows deliverables
         uses: actions/upload-artifact@v4
         with:
-          name: Percentage-Calculator-Tool-Windows-v2.0.0
+          name: Percentage-Calculator-Tool-Windows-v2.1.0
           path: dist/**
           if-no-files-found: error
 
@@ -78,9 +78,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $tag = $env:GITHUB_REF_NAME
-          gh release create $tag `
-            (Get-Item "dist/Installer/*setup*.exe").FullName `
-            (Get-Item "dist/Installer/*.msi").FullName `
-            (Get-Item "dist/Portable/*.exe").FullName `
-            --title "Percentage Calculator Tool Desktop $tag (Tauri v2 + Rust)" `
-            --notes-file .github/release-notes-v2.0.0.md
+          $notesFile = ".github/release-notes-$tag.md"
+          if (Test-Path $notesFile) {
+            gh release create $tag `
+              (Get-Item "dist/Installer/*setup*.exe").FullName `
+              (Get-Item "dist/Installer/*.msi").FullName `
+              (Get-Item "dist/Portable/*.exe").FullName `
+              --title "Percentage Calculator Tool Desktop $tag (Tauri v2 + Rust)" `
+              --notes-file $notesFile
+          } else {
+            gh release create $tag `
+              (Get-Item "dist/Installer/*setup*.exe").FullName `
+              (Get-Item "dist/Installer/*.msi").FullName `
+              (Get-Item "dist/Portable/*.exe").FullName `
+              --title "Percentage Calculator Tool Desktop $tag (Tauri v2 + Rust)" `
+              --generate-notes
+          }

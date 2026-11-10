@@ -43,16 +43,18 @@ In **v1.0–v1.1** the desktop shell used Electron. In **v2.0.0** the app was re
 
 ## Final Scope Definition
 
-### Included in the Current Version (v2.0.0)
+### Included in the Current Version (v2.1.0)
 
 - Tauri v2 + Rust desktop app
 - Windows native title bar
 - offline local webview UI (`ui/`)
-- five percentage calculators implemented in Rust (`crates/percent-core`)
+- seven percentage, pricing, and tax calculators implemented in Rust (`crates/percent-core`)
+- `⇅ swap values` pill between the two input fields in every card
+- persistent local calculation history (up to 500 entries stored at `%APPDATA%\com.percentagecalculator.tool\history.json`, with `copy`, `↺ restore`, and `clear history`)
 - live formula previews
 - copy-to-clipboard buttons with visible feedback
 - Clear All button
-- native About dialog
+- redesigned in-app dark terminal About modal crediting **Mohamed Sayed · Ahmed Emara · DeepSeek · ChatGPT · Antigravity**
 - Rust unit tests + 10,661-case golden parity suite against v1.1 JS math
 - real-window Tauri smoke test (`--smoke-test`)
 - Windows NSIS and MSI installer builds
@@ -71,6 +73,8 @@ The current app supports:
 - percentage portion of a number
 - discount final price and savings
 - original value from a known percentage
+- markup % and gross profit margin % from cost and selling price
+- reverse tax / VAT (add tax to net or extract tax from gross total)
 
 These are intentionally practical calculations rather than a full spreadsheet or financial system.
 
@@ -84,7 +88,7 @@ The project intentionally does not include:
 - cloud sync
 - telemetry
 - analytics
-- database storage
+- external database servers (only a single local JSON history file in the user's app data directory)
 - network calls
 - auto-updater
 - paid code signing
@@ -119,8 +123,8 @@ The tool is small, but the documentation is intentionally serious because future
 The project is considered successful if:
 
 - the calculator works locally as a Tauri v2 desktop app
-- all five calculator sections preserve the original v1.1 behavior byte-for-byte
-- copy feedback and Clear All work reliably
+- the original five calculator sections preserve v1.1 behavior byte-for-byte, and the new Markup & Margin and Reverse Tax/VAT calculators use the same formatting rules
+- input swapping, persistent local history, copy feedback, Clear All, and the dark About modal work reliably
 - the app exposes narrow, least-privilege Tauri commands and capabilities
 - the Windows installer and portable builds are generated automatically in CI
 - the documentation explains the project context and architecture clearly
@@ -130,10 +134,10 @@ The project is considered successful if:
 
 ## Current Final State
 
-At the **v2.0.0** stage, the project is:
+At the **v2.1.0** stage, the project is:
 
 - implemented as a Cargo workspace (`percent-core` + `src-tauri`) with a static `ui/` frontend
-- tested with Rust unit tests, 10,661 golden parity cases, and a live desktop smoke test
+- tested with Rust unit tests, 10,661 golden parity cases, and an expanded live desktop smoke test
 - packaged for Windows as NSIS, MSI, and portable builds via GitHub Actions
 - documented in a numbered `Documentation` folder
-- preserved with the `v1.1.0-electron` tag pointing at the final Electron version
+- preserved with the `v1.1.0-electron` tag pointing at the final Electron version and `v2.0.0` pointing at the initial Tauri rebuild

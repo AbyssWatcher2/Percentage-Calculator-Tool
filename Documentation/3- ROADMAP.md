@@ -75,6 +75,25 @@ The app keeps the exact look, feel, and results of v1.1 while shipping as a smal
 
 ---
 
+## Phase 8 - v2.1.0 Feature Expansion & Dark Terminal About Modal
+**Status: Completed**
+
+### Goals
+
+- add a `⇅ swap values` button between the two inputs on every calculator card
+- add **Markup & Profit Margin** and **Reverse Tax / VAT** (`add tax` / `extract tax`) calculator cards
+- add a **persistent local calculation history tape** (capped at 500 entries, with `copy`, `↺ restore`, and `clear history`)
+- replace the white native Windows `MessageBox` About popup with an **in-app dark terminal About modal** and update credits to **Mohamed Sayed · Ahmed Emara · DeepSeek · ChatGPT · Antigravity**
+
+### What was completed
+
+- extended `percent-core` with `calculate_markup_margin` and `calculate_tax` (`TaxMode::Add` / `TaxMode::Extract`) plus unit tests
+- added atomic local JSON history persistence (`%APPDATA%\com.percentagecalculator.tool\history.json`) in `src-tauri` with a 500-entry FIFO limit, input validation, consecutive deduplication, and isolated in-memory storage during `--smoke-test`
+- built the custom dark-terminal About modal in `ui/` and removed the `tauri-plugin-dialog` dependency
+- expanded the automated `--smoke-test` suite to cover swapping, Markup & Margin, Tax/VAT add & extract, history recording/restoring/clearing, and the new About modal
+
+---
+
 ## Optional Future Work
 
 Future improvements can include:

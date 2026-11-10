@@ -366,3 +366,20 @@ Before changing any application code:
 4. **`.github/workflows/build.yml`** — GitHub Actions pipeline running `cargo fmt --check`, `cargo clippy`, `cargo test -p percent-core`, `cargo tauri build` on `windows-latest`, the live `percentage-calculator-tool.exe --smoke-test`, and uploading the NSIS installer, MSI installer, and standalone portable `.exe`.
 5. **Cleanup** — removed the legacy `electron/`, `src/`, `tests/`, `scripts/`, `package.json`, and `package-lock.json` files once the Tauri build and smoke test passed.
 
+---
+
+## Session: November 10th, 2026 - v2.1.0 Feature Expansion & Dark Terminal About Modal
+
+---
+
+### Goal
+
+Expand Percentage Calculator Tool Desktop to **v2.1.0** while keeping the terminal aesthetic, strict CSP, and DOM-safe rendering (`textContent` / `replaceChildren` only):
+
+1. **`⇅ swap values` pill** between the two input fields across all 7 calculator cards.
+2. **Markup & Profit Margin card** (`Cost` + `Selling price` → `Profit`, `Markup %`, `Margin %`).
+3. **Reverse Tax / VAT card** with an `[ add tax | extract tax ]` segmented toggle.
+4. **Persistent local calculation history tape** at the bottom of the app (up to 500 entries stored in `%APPDATA%\com.percentagecalculator.tool\history.json`, recorded on explicit actions, with `copy`, `↺ restore`, and `clear history`).
+5. **Redesigned in-app dark terminal About modal** replacing the bright white Windows OS `MessageBox`, crediting **Mohamed Sayed · Ahmed Emara · DeepSeek · ChatGPT · Antigravity**, and dropping `tauri-plugin-dialog`.
+
+
