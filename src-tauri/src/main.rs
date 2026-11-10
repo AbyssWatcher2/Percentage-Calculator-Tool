@@ -3,11 +3,20 @@
 
 mod commands;
 
+use std::sync::Mutex;
 use std::time::Duration;
 use tauri::Manager;
 
+use commands::HistoryEntry;
+
 pub struct SmokeState {
     pub enabled: bool,
+}
+
+pub struct HistoryState {
+    pub in_memory_only: bool,
+    pub entries: Mutex<Vec<HistoryEntry>>,
+    pub next_id: Mutex<u64>,
 }
 
 fn main() {
@@ -15,11 +24,28 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
-        .plugin(tauri_plugin_dialog::init())
         .manage(SmokeState {
             enabled: smoke_enabled,
         })
         .setup(move |app| {
+            let initial_entries = if smoke_enabled {
+                Vec::new()
+            } else {
+                commands::load_history_from_disk(app.handle())
+            };
+            let next_id = initial_entries
+                .iter()
+                .map(|entry| entry.id)
+                .max()
+                .unwrap_or(0)
+                .saturating_add(1);
+
+            app.manage(HistoryState {
+                in_memory_only: smoke_enabled,
+                entries: Mutex::new(initial_entries),
+                next_id: Mutex::new(next_id),
+            });
+
             if smoke_enabled {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.hide();
@@ -40,9 +66,13 @@ fn main() {
             commands::calc_portion,
             commands::calc_discount,
             commands::calc_original,
+            commands::calc_markup_margin,
+            commands::calc_tax,
+            commands::history_list,
+            commands::history_add,
+            commands::history_clear,
             commands::copy_text,
             commands::get_app_info,
-            commands::show_about_dialog,
             commands::is_smoke_test,
             commands::report_smoke_result,
         ])
