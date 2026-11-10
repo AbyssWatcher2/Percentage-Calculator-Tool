@@ -4,7 +4,7 @@
 //! on their own (`cargo test -p percent-core`) and verified byte-for-byte
 //! against the original v1.1 JavaScript implementation.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// Outcome of a single-value percentage calculation.
 ///
@@ -42,6 +42,64 @@ pub struct DiscountResult {
     pub label: String,
     #[serde(rename = "copyText")]
     pub copy_text: String,
+}
+
+/// Outcome of the Markup & Profit Margin calculator.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(tag = "ok")]
+pub enum MarkupMarginResult {
+    #[serde(rename = "true")]
+    Ok {
+        profit: f64,
+        markup: f64,
+        margin: f64,
+        #[serde(rename = "profitText")]
+        profit_text: String,
+        #[serde(rename = "markupText")]
+        markup_text: String,
+        #[serde(rename = "marginText")]
+        margin_text: String,
+        label: String,
+        #[serde(rename = "liveResult")]
+        live_result: String,
+        #[serde(rename = "copyText")]
+        copy_text: String,
+    },
+    #[serde(rename = "false")]
+    Err { error: &'static str },
+}
+
+/// Mode for the Tax / VAT calculator.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum TaxMode {
+    Add,
+    Extract,
+}
+
+/// Outcome of the Tax / VAT calculator (add tax to net or extract tax from gross).
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(tag = "ok")]
+pub enum TaxResult {
+    #[serde(rename = "true")]
+    Ok {
+        net: f64,
+        tax: f64,
+        total: f64,
+        #[serde(rename = "netText")]
+        net_text: String,
+        #[serde(rename = "taxText")]
+        tax_text: String,
+        #[serde(rename = "totalText")]
+        total_text: String,
+        label: String,
+        #[serde(rename = "liveResult")]
+        live_result: String,
+        #[serde(rename = "copyText")]
+        copy_text: String,
+    },
+    #[serde(rename = "false")]
+    Err { error: &'static str },
 }
 
 /// JavaScript-identical `Math.round(x)`:
@@ -214,6 +272,107 @@ pub fn calculate_original_value(value: f64, percent: f64) -> CalcResult {
     }
 }
 
+/// Calculates profit, markup %, and profit margin % from `cost` and `selling_price`:
+/// - `profit = selling_price - cost`
+/// - `markup = (profit / cost) * 100`
+/// - `margin = (profit / selling_price) * 100`
+pub fn calculate_markup_margin(cost: f64, selling_price: f64) -> MarkupMarginResult {
+    if cost == 0.0 {
+        return MarkupMarginResult::Err {
+            error: "Cost cannot be zero",
+        };
+    }
+    if selling_price == 0.0 {
+        return MarkupMarginResult::Err {
+            error: "Selling price cannot be zero",
+        };
+    }
+
+    let profit = selling_price - cost;
+    let markup = (profit / cost) * 100.0;
+    let margin = (profit / selling_price) * 100.0;
+
+    let profit_text = format_decimal(profit);
+    let markup_text = format!("{}%", format_decimal(markup));
+    let margin_text = format!("{}%", format_decimal(margin));
+
+    let label = format!("Profit: {profit_text}<br>Markup: {markup_text} · Margin: {margin_text}");
+    let live_result =
+        format!("Profit: {profit_text} | Markup: {markup_text} | Margin: {margin_text}");
+    let copy_text = format!("Profit: {profit_text}\nMarkup: {markup_text}\nMargin: {margin_text}");
+
+    MarkupMarginResult::Ok {
+        profit,
+        markup,
+        margin,
+        profit_text,
+        markup_text,
+        margin_text,
+        label,
+        live_result,
+        copy_text,
+    }
+}
+
+/// Adds tax (`TaxMode::Add`) or extracts tax from a tax-inclusive gross total
+/// (`TaxMode::Extract`).
+pub fn calculate_tax(amount: f64, rate_percent: f64, mode: TaxMode) -> TaxResult {
+    match mode {
+        TaxMode::Add => {
+            let net = amount;
+            let tax = amount * (rate_percent / 100.0);
+            let total = amount + tax;
+            let net_text = format_decimal(net);
+            let tax_text = format_decimal(tax);
+            let total_text = format_decimal(total);
+            let label = format!("Total: {total_text}<br>Tax: {tax_text} (Net: {net_text})");
+            let live_result = format!("Total: {total_text} | Tax: {tax_text}");
+            let copy_text = format!("Total: {total_text}\nTax: {tax_text}\nNet: {net_text}");
+
+            TaxResult::Ok {
+                net,
+                tax,
+                total,
+                net_text,
+                tax_text,
+                total_text,
+                label,
+                live_result,
+                copy_text,
+            }
+        }
+        TaxMode::Extract => {
+            let divisor = 100.0 + rate_percent;
+            if divisor == 0.0 {
+                return TaxResult::Err {
+                    error: "Tax rate cannot be -100%",
+                };
+            }
+            let total = amount;
+            let net = (amount * 100.0) / divisor;
+            let tax = amount - net;
+            let net_text = format_decimal(net);
+            let tax_text = format_decimal(tax);
+            let total_text = format_decimal(total);
+            let label = format!("Net: {net_text}<br>Tax: {tax_text} (Total: {total_text})");
+            let live_result = format!("Net: {net_text} | Tax: {tax_text}");
+            let copy_text = format!("Net: {net_text}\nTax: {tax_text}\nTotal: {total_text}");
+
+            TaxResult::Ok {
+                net,
+                tax,
+                total,
+                net_text,
+                tax_text,
+                total_text,
+                label,
+                live_result,
+                copy_text,
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -327,6 +486,74 @@ mod tests {
             calculate_original_value(50.0, 0.0),
             CalcResult::Err {
                 error: "Percent cannot be zero"
+            }
+        );
+    }
+
+    #[test]
+    fn markup_and_margin_works_and_rejects_zeros() {
+        assert_eq!(
+            calculate_markup_margin(80.0, 100.0),
+            MarkupMarginResult::Ok {
+                profit: 20.0,
+                markup: 25.0,
+                margin: 20.0,
+                profit_text: "20.00".into(),
+                markup_text: "25.00%".into(),
+                margin_text: "20.00%".into(),
+                label: "Profit: 20.00<br>Markup: 25.00% · Margin: 20.00%".into(),
+                live_result: "Profit: 20.00 | Markup: 25.00% | Margin: 20.00%".into(),
+                copy_text: "Profit: 20.00\nMarkup: 25.00%\nMargin: 20.00%".into(),
+            }
+        );
+        assert_eq!(
+            calculate_markup_margin(0.0, 100.0),
+            MarkupMarginResult::Err {
+                error: "Cost cannot be zero"
+            }
+        );
+        assert_eq!(
+            calculate_markup_margin(80.0, 0.0),
+            MarkupMarginResult::Err {
+                error: "Selling price cannot be zero"
+            }
+        );
+    }
+
+    #[test]
+    fn tax_add_and_extract_work() {
+        assert_eq!(
+            calculate_tax(100.0, 15.0, TaxMode::Add),
+            TaxResult::Ok {
+                net: 100.0,
+                tax: 15.0,
+                total: 115.0,
+                net_text: "100.00".into(),
+                tax_text: "15.00".into(),
+                total_text: "115.00".into(),
+                label: "Total: 115.00<br>Tax: 15.00 (Net: 100.00)".into(),
+                live_result: "Total: 115.00 | Tax: 15.00".into(),
+                copy_text: "Total: 115.00\nTax: 15.00\nNet: 100.00".into(),
+            }
+        );
+        assert_eq!(
+            calculate_tax(115.0, 15.0, TaxMode::Extract),
+            TaxResult::Ok {
+                net: 100.0,
+                tax: 15.0,
+                total: 115.0,
+                net_text: "100.00".into(),
+                tax_text: "15.00".into(),
+                total_text: "115.00".into(),
+                label: "Net: 100.00<br>Tax: 15.00 (Total: 115.00)".into(),
+                live_result: "Net: 100.00 | Tax: 15.00".into(),
+                copy_text: "Net: 100.00\nTax: 15.00\nTotal: 115.00".into(),
+            }
+        );
+        assert_eq!(
+            calculate_tax(100.0, -100.0, TaxMode::Extract),
+            TaxResult::Err {
+                error: "Tax rate cannot be -100%"
             }
         );
     }
